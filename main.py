@@ -85,8 +85,11 @@ def add_review_to_db(message, worker_id, productivity, potential):
 
 
 def get_summary(message, worker_id):
-    for review in sql.execute(f"SELECT Отзыв FROM users WHERE ID = '{worker_id}'"):
-        bot.send_message(message.chat.id, review, reply_markup=mm)
+    # for review in sql.execute(f"SELECT Потенциал FROM users WHERE ID = '{worker_id}'"):
+    #     bot.send_message(message.chat.id, review, reply_markup=mm)
+
+    avg_potetial = sql.execute(f"SELECT Avg(Потенциал) FROM users WHERE ID = '{worker_id}'")
+    bot.send_message(message.chat.id, int(avg_potetial.fetchone()[0])/3*100, reply_markup=mm) #TODO: FIX
 
 
 bot.polling(none_stop=True)

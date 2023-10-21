@@ -21,6 +21,19 @@ button1 = types.KeyboardButton("Написать отзыв")
 button2 = types.KeyboardButton("Запросить данные по ID")
 mm.add(button1, button2)
 
+# Переместил Ваши кнопки и клавиатуры отдельно от кода.
+rating = types.InlineKeyboardMarkup(row_width=5)
+one = types.InlineKeyboardButton(text='1', callback_data=1)
+two = types.InlineKeyboardButton(text='2', callback_data=2)
+three = types.InlineKeyboardButton(text='3', callback_data=3)
+four = types.InlineKeyboardButton(text='4', callback_data=4)
+five = types.InlineKeyboardButton(text='5', callback_data=5)
+rating.add(one)
+rating.add(two)
+rating.add(three)
+rating.add(four)
+rating.add(five)
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -43,7 +56,7 @@ def handler(message):
 def collect_id(message, mode):
     worker_id = message.text
     if mode == "add":
-        bot.send_message(message.chat.id, f"Введите отзыв на сотрудника {worker_id}")
+        bot.send_message(message.chat.id, f"Введите отзыв на сотрудника {worker_id}", reply_markup=rating)
         bot.register_next_step_handler(message, add_review_to_db, worker_id)
     elif mode == "get":
         get_summary(message, worker_id)
@@ -52,8 +65,6 @@ def collect_id(message, mode):
 def add_review_to_db(message, worker_id):
     text = message.text
     print(worker_id, text)
-    """
-    """
     sql.execute(f"INSERT INTO users VALUES(?,?,?,?,?)", (worker_id, text, 1, 2, 3))
     db.commit()
     bot.send_message(message.chat.id, f"Отзыв на сотрудника {worker_id} добавлен!", reply_markup=mm)

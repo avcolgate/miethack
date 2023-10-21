@@ -32,7 +32,7 @@ def handler(message):
     if message.text == "Написать отзыв":
         bot.send_message(message.chat.id, "Введите ID пользователя, на которого хотите написать отзыв",
                          reply_markup=types.ReplyKeyboardRemove())
-        bot.register_next_step_handler(message, collect_id)
+        bot.register_next_step_handler(message, collect_id, "add")
 
     if message.text == "Запросить данные по ID":
         bot.send_message(message.chat.id, "Введите ID пользователя, для которого нужно вывести данные",
@@ -40,7 +40,7 @@ def handler(message):
         bot.register_next_step_handler(message, collect_id, "get")
 
 
-def collect_id(message, mode="add"):
+def collect_id(message, mode):
     worker_id = message.text
     if mode == "add":
         bot.send_message(message.chat.id, f"Введите отзыв на сотрудника {worker_id}")

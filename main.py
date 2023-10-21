@@ -1,6 +1,7 @@
 import telebot
 from telebot import types
 import sqlite3
+from conversion import text_to_rating
 
 db = sqlite3.connect('users.db', check_same_thread=False)
 sql = db.cursor()
@@ -14,7 +15,7 @@ sql.execute("""CREATE TABLE IF NOT EXISTS users(
 )""")
 db.commit()
 
-bot = telebot.TeleBot('6670755134:AAFytKlfLEtiyTHsAcXtxCrQ50MYCqiJpJU')
+bot = telebot.TeleBot('6311525813:AAF0LU5zcX-_8EbM8ZI9M5rtuTxOaJAszGA')
 
 mm = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 button1 = types.KeyboardButton("Написать отзыв")
@@ -22,19 +23,24 @@ button2 = types.KeyboardButton("Запросить данные по ID")
 mm.add(button1, button2)
 
 
-rating = types.InlineKeyboardMarkup(row_width=3)
+def create_rating():
+    rating = types.ReplyKeyboardMarkup(row_width=3)
 
-lower_than_average = types.InlineKeyboardButton(text='Ниже среднего', callback_data=1)
-average = types.InlineKeyboardButton(text='Средняя', callback_data=2)
-greater_than_average = types.InlineKeyboardButton(text='Выше среднего', callback_data=3)
-rating.add(lower_than_average)
-rating.add(average)
-rating.add(greater_than_average)
+    lower_than_average = types.KeyboardButton('Ниже среднего')
+    average = types.KeyboardButton('Средняя')
+    greater_than_average = types.KeyboardButton('Выше среднего')
+    rating.add(lower_than_average)
+    rating.add(average)
+    rating.add(greater_than_average)
+    return rating
 
+rating = create_rating()
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.chat.id, "Привет! Что будем делать?", reply_markup=mm)
+    bot.send_message(message.chat.id, "Вас приветствует бот создания и получения"
+                                      " отзывов о сотрудниках компании ГринСайт."
+                                      " Он предоставляет доступ к базе данных", reply_markup=mm)
 
 
 @bot.message_handler(content_types=['text'])
@@ -49,29 +55,31 @@ def handler(message):
                          reply_markup=types.ReplyKeyboardRemove())
         bot.register_next_step_handler(message, collect_id, "get")
 
-
-@bot.callback_query_handler(func=lambda call: True)
-def callback_query(call):
-    if call.data == 1:
-        bot.answer_callback_query(call.id, "Answer is 1")
-    elif call.data == 2:
-        bot.answer_callback_query(call.id, "Answer is 2")
-    elif call.data == 3:
-        bot.answer_callback_query(call.id, "Answer is 3")
-
 def collect_id(message, mode):
     worker_id = message.text
     if mode == "add":
-        bot.send_message(message.chat.id, f"Введите отзыв на сотрудника {worker_id}", reply_markup=rating)
-        bot.register_next_step_handler(message, add_review_to_db, worker_id)
+        bot.send_message(message.chat.id, f"Введите оценку продуктивности сотрудника {worker_id}",
+                         reply_markup=rating)
+        bot.register_next_step_handler(message, set_productivity, worker_id)
     elif mode == "get":
         get_summary(message, worker_id)
 
+def set_productivity(message, worker_id):
+    productivity = text_to_rating(message.text)
+    bot.send_message(message.chat.id, f"Введите оценку потенциала сотрудника {worker_id}",
+                     reply_markup=rating)
+    bot.register_next_step_handler(message, set_potential, worker_id, productivity)
 
-def add_review_to_db(message, worker_id):
+def set_potential(message, worker_id, productivity):
+    potential = text_to_rating(message.text)
+    bot.send_message(message.chat.id, f"Введите отзыв на сотрудника {worker_id}")
+    bot.register_next_step_handler(message, add_review_to_db, worker_id, productivity, potential)
+
+
+def add_review_to_db(message, worker_id, productivity, potential):
     text = message.text
     print(worker_id, text)
-    sql.execute(f"INSERT INTO users VALUES(?,?,?,?,?)", (worker_id, text, 1, 2, 3))
+    sql.execute(f"INSERT INTO users VALUES(?,?,?,?,?)", (worker_id, text, 0, potential, productivity))
     db.commit()
     bot.send_message(message.chat.id, f"Отзыв на сотрудника {worker_id} добавлен!", reply_markup=mm)
 

@@ -3,12 +3,19 @@ from telebot import types
 def default_keyboard():
     mm = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     button1 = types.KeyboardButton("Написать отзыв")
-    # button2 = types.KeyboardButton("Запросить отзывы по ID")
-    # button3 = types.KeyboardButton("Запросить средние показатели по ID")
-    button4 = types.KeyboardButton("Запросить отзывы по имени")
-    button5 = types.KeyboardButton("Запросить данные по имени")
+    button2 = types.KeyboardButton("Запросить отзывы")
+    button3 = types.KeyboardButton("Запросить средние показатели")
     button6 = types.KeyboardButton("Запросить данные по отзывам от пользователя")
-    mm.add(button1, button4, button5, button6)
+    mm.add(button1,button2, button3, button6)
+    return mm
+
+def name_keyboard():
+    mm = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+    button1 = types.KeyboardButton("Написать отзыв")
+    button2 = types.KeyboardButton("Запросить отзывы")
+    button3 = types.KeyboardButton("Запросить данные")
+    button4 = types.KeyboardButton("Запросить данные по отзывам от пользователя")
+    mm.add(button1, button2, button3, button4)
     return mm
 
 def create_rating():

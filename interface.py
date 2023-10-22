@@ -5,6 +5,7 @@ from nlp_model import PredictModel
 from nlp_model import tokenize
 import database
 import sqlite3
+from bot_token import *
 
 """
 Creating/initializing database and bot 
@@ -19,16 +20,15 @@ sql.execute("""CREATE TABLE IF NOT EXISTS users(
     Производительность INT
 )""")
 db.commit()
-sql.execute("""CREATE TABLE IF NOT EXISTS users(
+
+sql.execute("""CREATE TABLE IF NOT EXISTS names(
     ID TEXT,
-    Отзыв TEXT,
-    Окраска INT,
-    Потенциал INT,
-    Производительность INT
+    name TEXT,
+    master_id TEXT
 )""")
 db.commit()
 
-bot = telebot.TeleBot('6311525813:AAF0LU5zcX-_8EbM8ZI9M5rtuTxOaJAszGA')
+bot = telebot.TeleBot(token_anton)
 
 """
 Creating/initializing keyboards

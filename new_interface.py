@@ -101,7 +101,7 @@ sql.execute("""CREATE TABLE IF NOT EXISTS users(
 )""")
 db.commit()
 
-bot = telebot.TeleBot(token_yarik)
+bot = telebot.TeleBot(token_anton)
 
 """
 Creating/initializing keyboards
@@ -171,15 +171,47 @@ def add_review_to_db(message, worker_id, productivity, potential, master_id):
 
 
 
+categories = {
+    ("Высокий", "Низкий"): ("Неоткрывшийся талант", "Человек, который показывает большие перспективы, но в настоящее время не демонстрирует высокой производительности."),
+    ("Высокий", "Средний"): ("Высокий потенциал", "Сотрудник, обладающий способностью расти и улучшать свои результаты."),
+    ("Высокий", "Высокий"): ("Звезда", "Лучший сотрудник с большим потенциалом для будущих ролей."),
+    ("Средний", "Низкий"): ("Непостоянный сотрудник", "Человек, который иногда соответствует ожиданиям, но не обладает постоянством."),
+    ("Средний", "Средний"): ("Стабильный сотрудник", "Надежный сотрудник с стабильной производительностью."),
+    ("Средний", "Высокий"): ("Высокая производительность", "Регулярно превосходит ожидания и имеет потенциал для роста."),
+    ("Низкий", "Низкий"): ("Требует внимания", "Сотрудник с ограниченным потенциалом и производительностью."),
+    ("Низкий", "Средний"): ("Средний исполнитель", "Человек, который часто соответствует базовым требованиям."),
+    ("Низкий", "Высокий"): ("Надежный исполнитель", "Превосходно справляется со своей текущей ролью, но не имеет потенциала для будущего роста.")
+}
+
+
+def determine_category(performance, potential):
+    performance_level = get_level(performance)
+    potential_level = get_level(potential)
+
+    category, description = categories.get((potential_level, performance_level), ("Неизвестно", "Описание неизвестно"))
+    return f"{category}: {description}"
+
+def get_level(value):
+    if value <= 41.5:
+        return "Низкий"
+    elif value <= 58.5:
+        return "Средний"
+    else:
+        return "Высокий"
+
+
 def get_summary(message, worker_id):
     msg = ''
     avg_tone = sql.execute(f"SELECT Avg(Окраска) FROM users WHERE ID = '{worker_id}'")
     msg += 'Мнение о сотруднике: ' + str(round(float(avg_tone.fetchone()[0]) / 2 * 100, 1)) + '%\n'
     avg_productivity = sql.execute(f"SELECT Avg(Производительность) FROM users WHERE ID = '{worker_id}'")
-    msg += 'Средняя продуктивость: ' + str(round(float(avg_productivity.fetchone()[0]) / 3 * 100, 1)) + '%\n'
+    float_productivity = round(float(avg_productivity.fetchone()[0]) / 3 * 100, 1)
+    msg += 'Средняя продуктивость: ' + str(float_productivity) + '%\n'
     avg_potential = sql.execute(f"SELECT Avg(Потенциал) FROM users WHERE ID = '{worker_id}'")
-    msg += 'Средний потенциал: ' + str(round(float(avg_potential.fetchone()[0]) / 3 * 100, 1)) + '%\n'
-
+    float_potential = round(float(avg_potential.fetchone()[0]) / 3 * 100, 1)
+    msg += 'Средний потенциал: ' + str(float_potential) + '%\n'
+    category = determine_category(float_productivity, float_potential)
+    msg += category
     bot.send_message(message.chat.id, msg, reply_markup=default_kb)
 
 

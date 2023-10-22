@@ -93,7 +93,7 @@ def handler(message):
 def collect_id(message, mode, master_id):
     worker_id = message.text
     if mode == "add":
-        if check_name(message, worker_id):
+        if check_name(message):
             bot.send_message(message.chat.id,
                              f"Фамилия сотрудника с ID не найдена, введите имя нового сотрудника: ",
                              reply_markup=types.ReplyKeyboardRemove())
@@ -119,7 +119,7 @@ def collect_id(message, mode, master_id):
 
 def add_name(message, worker_id, master_id):
     name = message.text
-    sql.execute(f"INSERT INTO names VALUES(?,?)", (worker_id, name))
+    sql.execute(f"INSERT INTO names VALUES(?,?,?)", (worker_id, name, master_id))
     db.commit()
     bot.send_message(message.chat.id, f"Введите оценку продуктивности сотрудника {worker_id}",
                      reply_markup=rating_kb)
@@ -147,7 +147,7 @@ def add_review_to_db(message, worker_id, productivity, potential, master_id):
     bot.send_message(message.chat.id, f"Отзыв на сотрудника {worker_id} добавлен!", reply_markup=default_kb)
 
 
-def check_name(message, id):
+def check_name(message):
     ids = sql.execute(f"SELECT names.id FROM names INNER JOIN users ON users.ID = names.ID").fetchall()
     ids = [' '.join(t) for t in ids]
     return message.text not in ids
@@ -209,7 +209,6 @@ def get_reviews_master_id(message, whataheeeelllomagad):                 # whata
     worker_name = message.text
     master_ids = database.get_joined_master_ids(sql)
     master_ids =  {s.pop(): s.pop() for s in map(set, master_ids)}
-    master_ids = {str(v): k for k, v in master_ids.items()}
 
     text = sql.execute(f"SELECT Отзыв FROM users WHERE master_id = '{master_ids[worker_name]}'")
     text = ''.join(str(x[0] + '\n\n') for x in text)

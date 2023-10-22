@@ -14,8 +14,8 @@ def default_keyboard():
 def name_keyboard():
     mm = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     button1 = types.KeyboardButton("Написать отзыв")
-    button2 = types.KeyboardButton("Запросить отзывы по имени")
-    button3 = types.KeyboardButton("Запросить данные по имени")
+    button2 = types.KeyboardButton("Запросить отзывы")
+    button3 = types.KeyboardButton("Запросить данные")
     button4 = types.KeyboardButton("Запросить данные по отзывам от пользователя")
     mm.add(button1, button2, button3, button4)
     return mm

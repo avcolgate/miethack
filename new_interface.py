@@ -84,7 +84,7 @@ from nlp_model import PredictModel
 from nlp_model import tokenize
 import database
 import sqlite3
-from bot_token import *
+from tokens import *
 
 """
 Creating/initializing database and bot 

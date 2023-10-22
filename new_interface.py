@@ -203,7 +203,7 @@ def get_level(value):
 def get_summary(message, worker_id):
     msg = ''
     avg_tone = sql.execute(f"SELECT Avg(Окраска) FROM users WHERE ID = '{worker_id}'")
-    msg += 'Мнение о сотруднике: ' + str(round(float(avg_tone.fetchone()[0]) / 2 * 100, 1)) + '%\n'
+    msg += 'Мнение о сотруднике: ' + str(round((float(avg_tone.fetchone()[0]) + 1) / 2 * 100, 1)) + '%\n'
     avg_productivity = sql.execute(f"SELECT Avg(Производительность) FROM users WHERE ID = '{worker_id}'")
     float_productivity = round(float(avg_productivity.fetchone()[0]) / 3 * 100, 1)
     msg += 'Средняя продуктивость: ' + str(float_productivity) + '%\n'

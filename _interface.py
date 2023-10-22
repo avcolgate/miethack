@@ -163,7 +163,7 @@ def get_summary_name(message, worker_id):
     names = {str(v): k for k, v in names.items()}
 
     if worker_name in names:
-        get_summary(message, names[worker_name])
+        get_summary(message, names[message.text])
     else:
         bot.send_message(message.chat.id, "Пользователь с указанным именем не найден", reply_markup=default_kb)
 
@@ -175,6 +175,7 @@ def get_summary(message, worker_id):
     avg_tone = sql.execute(f"SELECT Avg(Окраска) FROM users WHERE ID = '{worker_id}'")
     msg += 'Средняя мнение: ' + str(round(float(avg_tone.fetchone()[0]) / 2 * 100, 1)) + '%\n'
     avg_productivity = sql.execute(f"SELECT Avg(Производительность) FROM users WHERE ID = '{worker_id}'")
+    msg += 'Средняя мнение: ' + str(round(float(avg_productivity.fetchone()[0]) / 2 * 100, 1)) + '%\n'
 
     bot.send_message(message.chat.id, msg, reply_markup=default_kb)
 

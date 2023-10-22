@@ -191,13 +191,14 @@ def get_review_name(message, whataheeeelllomagad):                      # whatah
     worker_name = message.text
     names = database.get_joined_ids(sql)
     names =  {s.pop(): s.pop() for s in map(set, names)}
+    names = {str(v): k for k, v in names.items()}
 
-    if worker_name not in names.values():
-        bot.send_message(message.chat.id, 'Пользователь с указанным именем не найден', reply_markup=default_kb)
-    else:
+    if worker_name in names:
         text = sql.execute(f"SELECT Отзыв FROM users WHERE ID = '{names[worker_name]}'")
         text = ''.join(str(x[0] + '\n\n') for x in text.fetchall())
         bot.send_message(message.chat.id, text, reply_markup=default_kb)
+    else:
+        bot.send_message(message.chat.id, 'Пользователь с указанным именем не найден', reply_markup=default_kb)
 
 def check_cheating_one(name, master_id):
     return (name in database.get_names(sql) and master_id not in database.get_masters(sql)

@@ -44,7 +44,7 @@ def handler(message):
         bot.send_message(message.chat.id, "Введите ID пользователя, на которого хотите написать отзыв",
                          reply_markup=types.ReplyKeyboardRemove())
         bot.register_next_step_handler(message, collect_id, "add", master_id)
-    elif message.text == "Запросить данные":
+    elif message.text == "Запросить средние показатели":
         bot.send_message(message.chat.id, "Введите ID пользователя, для которого нужно вывести данные",
                          reply_markup=types.ReplyKeyboardRemove())
         bot.register_next_step_handler(message, collect_id, "get_avg_id", master_id)
@@ -53,9 +53,7 @@ def handler(message):
                          reply_markup=types.ReplyKeyboardRemove())
         bot.register_next_step_handler(message, collect_id, "get_review_id", master_id)
     elif message.text == "Запросить данные по отзывам от пользователя":
-        bot.send_message(message.chat.id, "Введите ID пользователя, для которого нужно вывести данные",
-                         reply_markup=types.ReplyKeyboardRemove())
-        bot.register_next_step_handler(message, collect_id, "get_reviews_master_id", master_id)
+        get_reviews_master_id(message)
 
 
 def collect_id(message, mode, master_id):
@@ -116,11 +114,8 @@ def get_review_id(message, worker_id):
 
 def get_reviews_master_id(message):
     worker_name = message.text
-    master_ids = database.get_joined_master_ids(sql)
-    master_ids =  {s.pop(): s.pop() for s in map(set, master_ids)}
-    master_ids = {str(v): k for k, v in master_ids.items()}
 
-    text = sql.execute(f"SELECT Отзыв FROM users WHERE master_id = '{master_ids[worker_name]}'")
+    text = sql.execute(f"SELECT Отзыв FROM users WHERE master_id = '{message.from_user.id}'")
     text = ''.join(str(x[0] + '\n\n') for x in text)
     bot.send_message(message.chat.id, text, reply_markup=default_kb)
 

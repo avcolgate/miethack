@@ -11,15 +11,29 @@ API ключ бота вставлен в код.
 
 ## ⬇️ Installation
 
-В случае, если вы хотите локально запустить проект, воспользуйтесь следующей инструкцтей.
+В случае, если вы хотите локально запустить проект, воспользуйтесь следующей инструкцией.
+
+1. Склонируйте репозиторий, используя HTTPS:
 
 ```sh
-# sh (like terminal) code here
+git clone https://github.com/avcolgate/miethack.git
 ```
 
-```python
-print('Hello') # python code here
+или SSH:
+
+```sh
+git clone git@github.com:avcolgate/miethack.git
 ```
+
+2. Доставьте все необходимые библиотеки, используя `pip`:
+
+```sh
+pip install telebot
+pip install nltk
+pip install joblib
+```
+
+3. Вставьте API ключ TG бота в файл `tokens.py`
 
 ## 👤 Authors
 
@@ -31,4 +45,4 @@ print('Hello') # python code here
 
 ## 📝 License
 
-Copyright &copy; 2023 MDT team with Greensight at MIETHACK 2023
+Copyright &copy; 2023 MTD team with Greensight at MIETHACK 2023

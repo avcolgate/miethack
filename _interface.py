@@ -1,5 +1,5 @@
 from telebot import types, telebot
-from init_keyboards import name_keyboard, create_rating
+from init_keyboards import default_keyboard, create_rating
 from conversion import text_to_rating
 from nlp_model import PredictModel
 from nlp_model import tokenize
@@ -28,12 +28,12 @@ sql.execute("""CREATE TABLE IF NOT EXISTS names(
 )""")
 db.commit()
 
-bot = telebot.TeleBot(token_yarik)
+bot = telebot.TeleBot(token_anton)
 
 """
 Creating/initializing keyboards
 """
-default_kb = name_keyboard()
+default_kb = default_keyboard()
 rating_kb = create_rating()
 
 
@@ -65,14 +65,22 @@ def add_user_id(message):                                                       
 def handler(message):
     master_id = message.from_user.id
     if message.text == "Написать отзыв":
-        bot.send_message(message.chat.id, "Введите имя пользователя, на которого хотите написать отзыв",
+        bot.send_message(message.chat.id, "Введите ID пользователя, на которого хотите написать отзыв",
                          reply_markup=types.ReplyKeyboardRemove())
         bot.register_next_step_handler(message, collect_id, "add", master_id)
-    if message.text == "Запросить отзывы":
+    if message.text == "Запросить данные по ID":
+        bot.send_message(message.chat.id, "Введите ID пользователя, для которого нужно вывести данные",
+                         reply_markup=types.ReplyKeyboardRemove())
+        bot.register_next_step_handler(message, collect_id, "get_avg_id", master_id)
+    if message.text == "Запросить отзывы по ID":
+        bot.send_message(message.chat.id, "Введите ID пользователя, для которого нужно вывести данные",
+                         reply_markup=types.ReplyKeyboardRemove())
+        bot.register_next_step_handler(message, collect_id, "get_review_id", master_id)
+    if message.text == "Запросить отзывы по имени":
         bot.send_message(message.chat.id, "Введите имя пользователя, для которого нужно вывести отзывы",
                          reply_markup=types.ReplyKeyboardRemove())
         bot.register_next_step_handler(message, get_review_name, "get_review_name")
-    if message.text == "Запросить данные":
+    if message.text == "Запросить данные по имени":
         bot.send_message(message.chat.id, "Введите имя пользователя, для которого нужно вывести данные",
                          reply_markup=types.ReplyKeyboardRemove())
         bot.register_next_step_handler(message, get_summary_name, "get_avg_name")
@@ -153,6 +161,7 @@ def get_summary_name(message, worker_id):
     names = database.get_joined_ids(sql)
     names =  {s.pop(): s.pop() for s in map(set, names)}
     names = {str(v): k for k, v in names.items()}
+
 
     if worker_name in names:
         get_summary(message, names[message.text])

@@ -53,7 +53,7 @@ sql.execute("""CREATE TABLE IF NOT EXISTS users(
 )""")
 db.commit()
 
-bot = telebot.TeleBot('6670755134:AAFytKlfLEtiyTHsAcXtxCrQ50MYCqiJpJU')
+bot = telebot.TeleBot('6311525813:AAF0LU5zcX-_8EbM8ZI9M5rtuTxOaJAszGA')
 
 mm = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 button1 = types.KeyboardButton("Написать отзыв")
@@ -82,22 +82,24 @@ rating = create_rating()
 def start(message):
     bot.send_message(message.chat.id, "Вас приветствует бот создания и получения"
                                       " отзывов о сотрудниках компании ГринСайт."
-                                      " Он предоставляет доступ к базе данных", reply_markup=mm)  
-    
+                                      " Он предоставляет доступ к базе данных", reply_markup=mm)
+
     master_id = str(message.from_user.id)
     if check_user_id(master_id):
         bot.send_message(message.chat.id, "Вашего id нет в базе данных, введите своё имя: ", reply_markup=types.ReplyKeyboardRemove())
         bot.register_next_step_handler(message, add_user_id, "add_user_id")
 
-def add_user_id(message, whataheeeelllomagad):                                                               # whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad 
+def add_user_id(message, whataheeeelllomagad):                                                               # whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad
     text = message.text
     master_id = str(message.from_user.id)
     if check_cheating_one(text, master_id):
         bot.send_message(message.chat.id, "Дурак, в бан!!!", reply_markup=mm)
-    else:   
+    else:
         new_worker_id = get_ids() + 1
         sql.execute(f"INSERT INTO names VALUES(?,?,?)", (new_worker_id, text, master_id))
         db.commit()
+        msg = "Что будем делать дальше?"
+        bot.send_message(message.chat.id, msg, reply_markup=mm)
 
 
 @bot.message_handler(content_types=['text'])
@@ -117,16 +119,16 @@ def handler(message):
         bot.send_message(message.chat.id, "Введите ID пользователя, для которого нужно вывести данные",
                          reply_markup=types.ReplyKeyboardRemove())
         bot.register_next_step_handler(message, collect_id, "get_review_id")
-    
+
     if message.text == "Запросить отзывы по имени":
         bot.send_message(message.chat.id, "Введите имя пользователя, для которого нужно вывести отзывы",
                          reply_markup=types.ReplyKeyboardRemove())
         bot.register_next_step_handler(message, get_review_name, "get_review_name")
-        
+
     if message.text == "Запросить данные по имени":
         bot.send_message(message.chat.id, "Введите имя пользователя, для которого нужно вывести данные",
                          reply_markup=types.ReplyKeyboardRemove())
-        bot.register_next_step_handler(message, get_summary_name, "get_avg_name")    
+        bot.register_next_step_handler(message, get_summary_name, "get_avg_name")
 
     if message.text == "Запросить данные по отзывам от пользователя":
         bot.send_message(message.chat.id, "Введите имя пользователя, для которого нужно вывести данные",
@@ -153,15 +155,15 @@ def collect_id(message, mode, master_id):
 
     elif mode == "get_review_name":
         bot.send_message(message.chat.id, f"Введите имя сотрудника: ", reply_markup=types.ReplyKeyboardRemove())
-        bot.register_next_step_handler(message, get_review_name, worker_id)    
-        
+        bot.register_next_step_handler(message, get_review_name, worker_id)
+
     elif mode == "get_avg_name":
         bot.send_message(message.chat.id, f"Введите имя сотрудника: ", reply_markup=types.ReplyKeyboardRemove())
-        bot.register_next_step_handler(message, get_summary_name, worker_id)          
-           
+        bot.register_next_step_handler(message, get_summary_name, worker_id)
+
     elif mode == "get_reviews_master_id":
         bot.send_message(message.chat.id, f"Введите имя сотрудника: ", reply_markup=types.ReplyKeyboardRemove())
-        bot.register_next_step_handler(message, get_reviews_master_id, worker_id)          
+        bot.register_next_step_handler(message, get_reviews_master_id, worker_id)
 
 
 def add_name(message, worker_id, master_id):
@@ -208,7 +210,7 @@ def get_joined_master_ids():
     master_ids = sql.execute(f"SELECT users.master_id, names.name FROM names INNER JOIN users ON users.master_id = names.master_id").fetchall()
     return master_ids
 
-def get_ids():                                                                                                      
+def get_ids():
     names_len = len(sql.execute(f"SELECT names.ID FROM names").fetchall())
     return names_len
 
@@ -244,7 +246,7 @@ def get_summary_ID(message, worker_id):
     msg += 'Средняя мнение: ' + str(round(float(avg_tone.fetchone()[0])/2 * 100, 1)) + '%\n'
     avg_productivity = sql.execute(f"SELECT Avg(Производительность) FROM users WHERE ID = '{worker_id}'")
     msg += 'Средняя производительность: ' + str(round(float(avg_productivity.fetchone()[0])/3 * 100, 1)) + '%\n'
-    
+
     bot.send_message(message.chat.id, msg, reply_markup=mm)
 
 
@@ -263,7 +265,7 @@ def get_summary_name(message, worker_id):
     msg += 'Средняя мнение: ' + str(round(float(avg_tone.fetchone()[0])/2 * 100, 1)) + '%\n'
     avg_productivity = sql.execute(f"SELECT Avg(Производительность) FROM users WHERE ID = '{names[worker_name]}'")
     msg += 'Средняя производительность: ' + str(round(float(avg_productivity.fetchone()[0])/3 * 100, 1)) + '%\n'
-    
+
     bot.send_message(message.chat.id, msg, reply_markup=mm)
 
 
@@ -271,9 +273,9 @@ def get_review_id(message, worker_id):
     text = sql.execute(f"SELECT Отзыв FROM users WHERE ID = '{worker_id}'")
     text = ''.join(str(x[0] + '\n\n') for x in text.fetchall())
     bot.send_message(message.chat.id, text, reply_markup=mm)
-    
 
-def get_review_name(message, whataheeeelllomagad):                      # whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad 
+
+def get_review_name(message, whataheeeelllomagad):                      # whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad
     worker_name = message.text
     names = get_joined_ids()
     names =  {s.pop(): s.pop() for s in map(set, names)}
@@ -286,7 +288,7 @@ def check_cheating_one(name, master_id):
     return name in get_names() and master_id not in get_masters() or name not in get_names() and master_id in get_masters()
 
 
-def get_reviews_master_id(message, whataheeeelllomagad):                 # whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad 
+def get_reviews_master_id(message, whataheeeelllomagad):                 # whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad whataheeeelllomagad
     worker_name = message.text
     master_ids = get_joined_master_ids()
     master_ids =  {s.pop(): s.pop() for s in map(set, master_ids)}
